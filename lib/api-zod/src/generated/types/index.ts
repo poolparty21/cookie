@@ -7,6 +7,8 @@
  */
 
 export * from "./apiError";
+export * from "./checkDomainInput";
+export * from "./checkDomainResult";
 export * from "./checkoutInput";
 export * from "./checkoutSession";
 export * from "./healthStatus";

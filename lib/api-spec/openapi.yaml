@@ -14,6 +14,8 @@ tags:
     description: Product and pricing operations
   - name: checkout
     description: Stripe checkout operations
+  - name: domain
+    description: Domain compliance check
 paths:
   /healthz:
     get:
@@ -44,6 +46,38 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Product"
+
+  /check-domain:
+    post:
+      operationId: checkDomain
+      tags: [domain]
+      summary: Check a domain for cookie consent compliance
+      description: Fetches the domain and scans for known cookie consent tools. Returns compliance status.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckDomainInput"
+      responses:
+        "200":
+          description: Compliance check result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckDomainResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
 
   /checkout:
     post:
@@ -104,6 +138,26 @@ components:
         currency:
           type: string
         interval:
+          type: string
+
+    CheckDomainInput:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+
+    CheckDomainResult:
+      type: object
+      required: [compliant, url]
+      properties:
+        url:
+          type: string
+        compliant:
+          type: boolean
+        tool:
+          type: ["string", "null"]
+        message:
           type: string
 
     CheckoutInput:

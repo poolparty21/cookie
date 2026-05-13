@@ -31,6 +31,21 @@ export const ListProductsResponseItem = zod.object({
 export const ListProductsResponse = zod.array(ListProductsResponseItem);
 
 /**
+ * Fetches the domain and scans for known cookie consent tools. Returns compliance status.
+ * @summary Check a domain for cookie consent compliance
+ */
+export const CheckDomainBody = zod.object({
+  url: zod.string(),
+});
+
+export const CheckDomainResponse = zod.object({
+  url: zod.string(),
+  compliant: zod.boolean(),
+  tool: zod.string().nullish(),
+  message: zod.string().optional(),
+});
+
+/**
  * Creates a Stripe checkout session and returns the redirect URL
  * @summary Create Stripe checkout session
  */

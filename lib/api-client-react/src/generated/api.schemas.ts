@@ -20,6 +20,18 @@ export interface Product {
   interval: string;
 }
 
+export interface CheckDomainInput {
+  url: string;
+}
+
+export interface CheckDomainResult {
+  url: string;
+  compliant: boolean;
+  /** @nullable */
+  tool?: string | null;
+  message?: string;
+}
+
 export interface CheckoutInput {
   priceId: string;
   email?: string;

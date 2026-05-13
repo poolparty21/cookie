@@ -18,6 +18,8 @@ import type {
 
 import type {
   ApiError,
+  CheckDomainInput,
+  CheckDomainResult,
   CheckoutInput,
   CheckoutSession,
   HealthStatus,
@@ -184,6 +186,93 @@ export function useListProducts<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Fetches the domain and scans for known cookie consent tools. Returns compliance status.
+ * @summary Check a domain for cookie consent compliance
+ */
+export const getCheckDomainUrl = () => {
+  return `/api/check-domain`;
+};
+
+export const checkDomain = async (
+  checkDomainInput: CheckDomainInput,
+  options?: RequestInit,
+): Promise<CheckDomainResult> => {
+  return customFetch<CheckDomainResult>(getCheckDomainUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(checkDomainInput),
+  });
+};
+
+export const getCheckDomainMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof checkDomain>>,
+    TError,
+    { data: BodyType<CheckDomainInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof checkDomain>>,
+  TError,
+  { data: BodyType<CheckDomainInput> },
+  TContext
+> => {
+  const mutationKey = ["checkDomain"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof checkDomain>>,
+    { data: BodyType<CheckDomainInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return checkDomain(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CheckDomainMutationResult = NonNullable<
+  Awaited<ReturnType<typeof checkDomain>>
+>;
+export type CheckDomainMutationBody = BodyType<CheckDomainInput>;
+export type CheckDomainMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Check a domain for cookie consent compliance
+ */
+export const useCheckDomain = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof checkDomain>>,
+    TError,
+    { data: BodyType<CheckDomainInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof checkDomain>>,
+  TError,
+  { data: BodyType<CheckDomainInput> },
+  TContext
+> => {
+  return useMutation(getCheckDomainMutationOptions(options));
+};
 
 /**
  * Creates a Stripe checkout session and returns the redirect URL

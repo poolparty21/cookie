@@ -1,40 +1,39 @@
 import { SEO } from "@/components/seo";
 import { Layout } from "@/components/layout";
-import { Link } from "wouter";
 import { CheckCircle2, ShieldCheck, Zap, Server } from "lucide-react";
 import { CheckoutForm } from "@/components/checkout-form";
+import { DomainChecker } from "@/components/domain-checker";
 
 export default function Home() {
   return (
     <Layout>
-      <SEO 
+      <SEO
         title="CookieLite — Cheapest GDPR Cookie Consent Banner"
         description="Get a fully compliant GDPR cookie banner for just €7/month. The most affordable GDPR cookie consent tool for small businesses. Easy setup."
         canonicalUrl="/"
       />
-      
+
       {/* Hero Section */}
       <section className="relative pt-24 pb-32 px-6 overflow-hidden flex flex-col items-center text-center bg-dot-pattern">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/90 z-0" />
-        
+
         <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center animate-in fade-in slide-in-from-bottom-8 duration-700">
           <div className="inline-flex items-center rounded-full border border-primary/20 px-3 py-1 text-sm font-medium text-primary mb-8 bg-card shadow-sm">
             <span className="flex h-2 w-2 rounded-full bg-accent mr-2"></span>
             The €7/month alternative to Cookiebot
           </div>
-          
+
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-primary mb-6 leading-tight">
-            Compliance that <br className="hidden sm:block" />
-            <span className="text-accent underline decoration-dashed underline-offset-8">actually makes sense.</span>
+            Is your site<br className="hidden sm:block" />
+            <span className="text-accent underline decoration-dashed underline-offset-8">GDPR compliant?</span>
           </h1>
-          
+
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl font-mono">
-            A stripped-down, honest GDPR cookie consent banner for EU businesses. Stop paying enterprise prices for something that should just work.
+            Enter your domain and we'll check for a cookie consent banner in seconds.
           </p>
-          
-          <div className="p-8 dotted-frame bg-card shadow-xl w-full max-w-md relative before:absolute before:-inset-1 before:border before:border-primary/10 before:-z-10">
-            <h3 className="font-bold text-lg mb-4 text-primary">Start your 14-day trial</h3>
-            <CheckoutForm />
+
+          <div className="w-full max-w-2xl">
+            <DomainChecker />
           </div>
         </div>
       </section>
@@ -65,7 +64,7 @@ export default function Home() {
                 <h2 className="text-3xl font-bold tracking-tight mb-4 text-primary">Everything you need. <br />Nothing you don't.</h2>
                 <p className="text-muted-foreground font-mono">We built exactly what the law requires, without the bloated dashboard or sneaky price hikes.</p>
               </div>
-              
+
               <ul className="space-y-4">
                 {[
                   "Customizable cookie banner",
@@ -82,13 +81,13 @@ export default function Home() {
                 ))}
               </ul>
             </div>
-            
+
             <div className="dotted-frame p-8 bg-card shadow-lg relative rotate-1 hover:rotate-0 transition-transform duration-300">
               <div className="absolute -top-4 -right-4 bg-primary text-primary-foreground px-4 py-1 text-sm font-bold shadow-md transform rotate-3">
                 Save 50%+
               </div>
               <h3 className="text-xl font-bold mb-6 text-center border-b border-dashed border-primary/20 pb-4">The Market Standard</h3>
-              
+
               <div className="space-y-6">
                 <div className="flex justify-between items-center opacity-50">
                   <span className="font-medium">Cookiebot</span>
@@ -102,7 +101,7 @@ export default function Home() {
                   <span className="font-medium">Usercentrics</span>
                   <span className="font-mono line-through">€9.00/mo</span>
                 </div>
-                
+
                 <div className="pt-6 mt-6 border-t border-dashed border-primary/20 flex justify-between items-center">
                   <span className="text-2xl font-bold text-primary">CookieLite</span>
                   <span className="text-3xl font-bold text-accent font-mono">€7.00<span className="text-sm text-muted-foreground">/mo</span></span>
@@ -118,7 +117,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-background/80 z-0" />
         <div className="max-w-3xl mx-auto relative z-10">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-12 text-primary">Honest Answers</h2>
-          
+
           <div className="space-y-6">
             {[
               { q: "What is a GDPR cookie banner?", a: "It's a notice that asks visitors for permission before tracking them with cookies. EU law requires this if your site uses analytics, marketing tools, or embedded content." },
@@ -141,16 +140,15 @@ export default function Home() {
         <div className="max-w-2xl mx-auto dotted-frame p-12 bg-primary text-primary-foreground relative overflow-hidden">
           <div className="absolute -right-10 -top-10 w-40 h-40 bg-accent/20 rounded-full blur-3xl" />
           <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-accent/20 rounded-full blur-3xl" />
-          
+
           <h2 className="text-3xl font-bold mb-6 relative z-10">Stop overpaying for compliance.</h2>
           <p className="text-primary-foreground/80 mb-8 font-mono relative z-10">Get set up in 5 minutes. Cancel anytime.</p>
-          
+
           <div className="bg-card text-foreground p-6 mx-auto relative z-10 max-w-sm">
             <CheckoutForm buttonText="Start for €7" />
           </div>
         </div>
       </section>
-
     </Layout>
   );
 }
