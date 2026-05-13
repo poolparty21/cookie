@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Link } from "wouter";
+import { CookieBanner } from "./cookie-banner";
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
@@ -22,21 +23,30 @@ export function Layout({ children }: { children: ReactNode }) {
         </main>
 
         <footer className="w-full border-t border-dashed border-primary/20 p-8 mt-auto z-10 bg-card">
-          <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground font-mono">
-              &copy; {new Date().getFullYear()} CookieLite EU. No tracking, ironically.
-            </p>
-            <div className="flex items-center gap-6">
-              <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Privacy Policy
-              </Link>
-              <a href="mailto:hello@cookielite.eu" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Contact
-              </a>
+          <div className="max-w-4xl mx-auto flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-sm text-muted-foreground font-mono">
+                &copy; {new Date().getFullYear()} CookieLite EU. No tracking, ironically.
+              </p>
+              <div className="flex items-center gap-6">
+                <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Privacy Policy
+                </Link>
+              </div>
             </div>
+            <p className="text-xs text-muted-foreground font-mono border-t border-dashed border-primary/10 pt-4">
+              <span className="font-semibold text-primary/60">Legal disclaimer:</span>{" "}
+              CookieLite provides a cookie consent banner tool to assist with GDPR compliance.
+              Use of this tool does not constitute legal advice and does not guarantee full
+              regulatory compliance. You remain responsible for ensuring your website meets
+              all applicable data protection laws. CookieLite EU is not liable for any
+              fines, penalties, or legal consequences arising from the use or misuse of this service.
+            </p>
           </div>
         </footer>
       </div>
+
+      <CookieBanner />
     </div>
   );
 }
