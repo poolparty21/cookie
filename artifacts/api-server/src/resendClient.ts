@@ -1,52 +1,42 @@
-// Resend integration via Replit connector
-import { Resend } from "resend";
+// Email client using Gmail SMTP via nodemailer
+import nodemailer from "nodemailer";
 
-let connectionSettings: any;
+const GMAIL_ADDRESS = "ilwaqfa@gmail.com";
 
-async function getCredentials() {
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
-  const xReplitToken = process.env.REPL_IDENTITY
-    ? "repl " + process.env.REPL_IDENTITY
-    : process.env.WEB_REPL_RENEWAL
-      ? "depl " + process.env.WEB_REPL_RENEWAL
-      : null;
-
-  if (!xReplitToken) {
-    throw new Error("X-Replit-Token not found for repl/depl");
-  }
-
-  connectionSettings = await fetch(
-    "https://" +
-      hostname +
-      "/api/v2/connection?include_secrets=true&connector_names=resend",
-    {
-      headers: {
-        Accept: "application/json",
-        "X-Replit-Token": xReplitToken,
-      },
-    }
-  )
-    .then((res) => res.json())
-    .then((data: { items?: unknown[] }) => data.items?.[0]);
-
-  if (!connectionSettings || !connectionSettings.settings.api_key) {
-    throw new Error("Resend not connected");
-  }
-
-  return {
-    apiKey: connectionSettings.settings.api_key as string,
-    fromEmail: connectionSettings.settings.from_email as string | undefined,
-  };
-}
-
-// WARNING: Never cache this client. Tokens expire — call fresh every time.
+// WARNING: Never cache this transporter if credentials may rotate.
 export async function getUncachableResendClient(): Promise<{
-  client: Resend;
+  client: { emails: { send: (opts: { from: string; to: string[]; subject: string; html: string }) => Promise<{ data?: { id?: string }; error?: unknown }> } };
   fromEmail: string;
 }> {
-  const { apiKey, fromEmail } = await getCredentials();
-  return {
-    client: new Resend(apiKey),
-    fromEmail: fromEmail || "onboarding@resend.dev",
+  const appPassword = process.env.GMAIL_APP_PASSWORD;
+  if (!appPassword) throw new Error("GMAIL_APP_PASSWORD secret is not set");
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: GMAIL_ADDRESS,
+      pass: appPassword,
+    },
+  });
+
+  // Wrap nodemailer in the same interface as the Resend client
+  const client = {
+    emails: {
+      send: async (opts: { from: string; to: string[]; subject: string; html: string }) => {
+        try {
+          await transporter.sendMail({
+            from: opts.from,
+            to: opts.to.join(", "),
+            subject: opts.subject,
+            html: opts.html,
+          });
+          return { data: { id: "gmail-sent" } };
+        } catch (err) {
+          return { error: err };
+        }
+      },
+    },
   };
+
+  return { client, fromEmail: GMAIL_ADDRESS };
 }
