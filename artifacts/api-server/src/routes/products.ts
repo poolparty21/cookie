@@ -1,22 +1,32 @@
 import { Router, type IRouter } from "express";
-import { storage } from "../storage";
-import { logger } from "../lib/logger";
+import { getUncachableStripeClient } from "../stripeClient";
 
 const router: IRouter = Router();
 
 router.get("/products", async (req, res) => {
   try {
-    const rows = await storage.listProductsWithPrices();
+    const stripe = await getUncachableStripeClient();
 
-    const products = rows.map((row: any) => ({
-      id: String(row.product_id),
-      name: String(row.product_name),
-      description: row.product_description ? String(row.product_description) : null,
-      priceId: String(row.price_id),
-      unitAmount: Number(row.unit_amount),
-      currency: String(row.currency),
-      interval: row.recurring ? (row.recurring as any).interval ?? "month" : "month",
-    }));
+    const [productsResp, pricesResp] = await Promise.all([
+      stripe.products.list({ active: true, limit: 20 }),
+      stripe.prices.list({ active: true, limit: 50, expand: ["data.product"] }),
+    ]);
+
+    const products = productsResp.data.map((product) => {
+      const price = pricesResp.data.find(
+        (p) => (typeof p.product === "string" ? p.product : p.product?.id) === product.id
+      );
+
+      return {
+        id: product.id,
+        name: product.name,
+        description: product.description ?? null,
+        priceId: price?.id ?? null,
+        unitAmount: price?.unit_amount ?? null,
+        currency: price?.currency ?? "eur",
+        interval: price?.recurring?.interval ?? "month",
+      };
+    });
 
     res.json(products);
   } catch (err) {
