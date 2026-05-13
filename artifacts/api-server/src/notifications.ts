@@ -1,5 +1,5 @@
 import { logger } from "./lib/logger";
-import { getResendClient } from "./resendClient";
+import { getUncachableResendClient } from "./resendClient";
 
 interface SaleNotification {
   eventType: string;
@@ -23,12 +23,15 @@ export async function sendSaleNotification(notification: SaleNotification): Prom
     return;
   }
 
-  const resend = await getResendClient();
-  if (!resend) {
-    logger.warn("Resend not connected — skipping email notification");
+  let resendClient: Awaited<ReturnType<typeof getUncachableResendClient>>;
+  try {
+    resendClient = await getUncachableResendClient();
+  } catch (err) {
+    logger.warn({ err }, "Resend not connected — skipping email notification");
     return;
   }
 
+  const { client, fromEmail } = resendClient;
   const amount = formatAmount(notification.amountTotal, notification.currency);
   const isCancel = notification.eventType === "customer.subscription.deleted";
   const isRenewal = notification.eventType === "invoice.paid";
@@ -66,8 +69,8 @@ export async function sendSaleNotification(notification: SaleNotification): Prom
     </div>`;
 
   try {
-    const { error } = await resend.emails.send({
-      from: "CookieLite <notifications@cookielite.eu>",
+    const { error } = await client.emails.send({
+      from: `CookieLite <${fromEmail}>`,
       to: [notifyEmail],
       subject,
       html,

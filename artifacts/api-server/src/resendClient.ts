@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 
-async function getResendApiKey(): Promise<string | null> {
+let connectionSettings: any;
+
+async function getCredentials(): Promise<{ apiKey: string; fromEmail: string }> {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? "repl " + process.env.REPL_IDENTITY
@@ -8,36 +10,30 @@ async function getResendApiKey(): Promise<string | null> {
       ? "depl " + process.env.WEB_REPL_RENEWAL
       : null;
 
-  if (!hostname || !xReplitToken) return null;
+  if (!xReplitToken) throw new Error("X-Replit-Token not found for repl/depl");
 
-  const isProduction = process.env.REPLIT_DEPLOYMENT === "1";
-  const targetEnvironment = isProduction ? "production" : "development";
-
-  try {
-    const url = new URL(`https://${hostname}/api/v2/connection`);
-    url.searchParams.set("include_secrets", "true");
-    url.searchParams.set("connector_names", "resend");
-    url.searchParams.set("environment", targetEnvironment);
-
-    const resp = await fetch(url.toString(), {
+  connectionSettings = await fetch(
+    "https://" + hostname + "/api/v2/connection?include_secrets=true&connector_names=resend",
+    {
       headers: { Accept: "application/json", "X-Replit-Token": xReplitToken },
       signal: AbortSignal.timeout(5_000),
-    });
+    }
+  )
+    .then((res) => res.json())
+    .then((data: any) => data.items?.[0]);
 
-    if (!resp.ok) return null;
-
-    const data = await resp.json() as {
-      items?: Array<{ settings?: { api_key?: string } }>;
-    };
-
-    return data.items?.[0]?.settings?.api_key ?? null;
-  } catch {
-    return null;
+  if (!connectionSettings?.settings?.api_key) {
+    throw new Error("Resend not connected");
   }
+
+  return {
+    apiKey: connectionSettings.settings.api_key,
+    fromEmail: connectionSettings.settings.from_email ?? "notifications@cookielite.eu",
+  };
 }
 
-export async function getResendClient(): Promise<Resend | null> {
-  const apiKey = await getResendApiKey();
-  if (!apiKey) return null;
-  return new Resend(apiKey);
+// WARNING: Never cache this client — tokens expire.
+export async function getUncachableResendClient(): Promise<{ client: Resend; fromEmail: string }> {
+  const { apiKey, fromEmail } = await getCredentials();
+  return { client: new Resend(apiKey), fromEmail };
 }
