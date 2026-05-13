@@ -3,13 +3,17 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: CookieLite GDPR Cookie Consent Manager API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: products
+    description: Product and pricing operations
+  - name: checkout
+    description: Stripe checkout operations
 paths:
   /healthz:
     get:
@@ -24,6 +28,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List products and prices
+      description: Returns all active products with their prices from Stripe
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /checkout:
+    post:
+      operationId: createCheckout
+      tags: [checkout]
+      summary: Create Stripe checkout session
+      description: Creates a Stripe checkout session and returns the redirect URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutInput"
+      responses:
+        "200":
+          description: Checkout session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSession"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +87,44 @@ components:
       required:
         - status
 
+    Product:
+      type: object
+      required: [id, name, priceId, unitAmount, currency, interval]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        priceId:
+          type: string
+        unitAmount:
+          type: integer
+        currency:
+          type: string
+        interval:
+          type: string
+
+    CheckoutInput:
+      type: object
+      required: [priceId, email]
+      properties:
+        priceId:
+          type: string
+        email:
+          type: string
+
+    CheckoutSession:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+
+    ApiError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
