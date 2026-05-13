@@ -36,7 +36,7 @@ export const ListProductsResponse = zod.array(ListProductsResponseItem);
  */
 export const CreateCheckoutBody = zod.object({
   priceId: zod.string(),
-  email: zod.string(),
+  email: zod.string().optional(),
 });
 
 export const CreateCheckoutResponse = zod.object({

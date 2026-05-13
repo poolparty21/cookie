@@ -22,7 +22,7 @@ export interface Product {
 
 export interface CheckoutInput {
   priceId: string;
-  email: string;
+  email?: string;
 }
 
 export interface CheckoutSession {

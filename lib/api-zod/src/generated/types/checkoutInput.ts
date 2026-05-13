@@ -8,5 +8,5 @@
 
 export interface CheckoutInput {
   priceId: string;
-  email: string;
+  email?: string;
 }

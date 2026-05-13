@@ -13,9 +13,12 @@ router.get("/products", async (req, res) => {
     ]);
 
     const products = productsResp.data.map((product) => {
-      const price = pricesResp.data.find(
+      const productPrices = pricesResp.data.filter(
         (p) => (typeof p.product === "string" ? p.product : p.product?.id) === product.id
       );
+      const price =
+        productPrices.find((p) => p.recurring?.interval === "month") ??
+        productPrices[0];
 
       return {
         id: product.id,

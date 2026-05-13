@@ -108,7 +108,7 @@ components:
 
     CheckoutInput:
       type: object
-      required: [priceId, email]
+      required: [priceId]
       properties:
         priceId:
           type: string
