@@ -1,39 +1,12 @@
 import { Resend } from "resend";
 
-let connectionSettings: any;
-
-async function getCredentials(): Promise<{ apiKey: string; fromEmail: string }> {
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
-  const xReplitToken = process.env.REPL_IDENTITY
-    ? "repl " + process.env.REPL_IDENTITY
-    : process.env.WEB_REPL_RENEWAL
-      ? "depl " + process.env.WEB_REPL_RENEWAL
-      : null;
-
-  if (!xReplitToken) throw new Error("X-Replit-Token not found for repl/depl");
-
-  connectionSettings = await fetch(
-    "https://" + hostname + "/api/v2/connection?include_secrets=true&connector_names=resend",
-    {
-      headers: { Accept: "application/json", "X-Replit-Token": xReplitToken },
-      signal: AbortSignal.timeout(5_000),
-    }
-  )
-    .then((res) => res.json())
-    .then((data: any) => data.items?.[0]);
-
-  if (!connectionSettings?.settings?.api_key) {
-    throw new Error("Resend not connected");
-  }
-
-  return {
-    apiKey: connectionSettings.settings.api_key,
-    fromEmail: connectionSettings.settings.from_email ?? "notifications@cookielite.eu",
-  };
-}
-
-// WARNING: Never cache this client — tokens expire.
+// Uses RESEND_API_KEY secret directly (set via Replit Secrets)
+// fromEmail falls back to onboarding@resend.dev for testing; set a verified domain in production
 export async function getUncachableResendClient(): Promise<{ client: Resend; fromEmail: string }> {
-  const { apiKey, fromEmail } = await getCredentials();
-  return { client: new Resend(apiKey), fromEmail };
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error("RESEND_API_KEY secret is not set");
+  return {
+    client: new Resend(apiKey),
+    fromEmail: "onboarding@resend.dev",
+  };
 }
