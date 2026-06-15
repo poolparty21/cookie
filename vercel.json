@@ -1,7 +1,7 @@
 {
   "framework": "vite",
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "cd artifacts/gdpr-consent && npx vite build",
+  "buildCommand": "pnpm --filter @workspace/gdpr-consent run build",
   "outputDirectory": "artifacts/gdpr-consent/dist",
   "rewrites": [
     {
