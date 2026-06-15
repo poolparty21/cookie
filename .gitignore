@@ -47,3 +47,12 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Vercel
+.vercel
+
+# Replit
+.replit
+.replitignore
+.agents/
+.config/

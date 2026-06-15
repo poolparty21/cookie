@@ -1,0 +1,12 @@
+{
+  "framework": "vite",
+  "installCommand": "pnpm install",
+  "buildCommand": "cd artifacts/gdpr-consent && npx vite build",
+  "outputDirectory": "artifacts/gdpr-consent/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
+}
