@@ -51,6 +51,9 @@ Thumbs.db
 # Vercel
 .vercel
 
+# API server source maps (large build artifacts)
+api/*.map
+
 # Replit
 .replit
 .replitignore
