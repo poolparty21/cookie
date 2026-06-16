@@ -1,12 +1,10 @@
 {
   "framework": "vite",
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm --filter @workspace/gdpr-consent run build",
+  "buildCommand": "pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/gdpr-consent run build",
   "outputDirectory": "artifacts/gdpr-consent/dist",
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/(.*)", "destination": "/" }
   ]
 }

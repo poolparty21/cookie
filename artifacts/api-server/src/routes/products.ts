@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { getUncachableStripeClient } from "../stripeClient";
+import { getUncachableStripeClient } from "../stripeClient.js";
 
 const router: IRouter = Router();
 

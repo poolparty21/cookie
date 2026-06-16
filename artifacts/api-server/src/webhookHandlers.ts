@@ -1,6 +1,6 @@
-import { getStripeSync } from "./stripeClient";
-import { sendSaleNotification } from "./notifications";
-import { logger } from "./lib/logger";
+import { getStripeSync } from "./stripeClient.js";
+import { sendSaleNotification } from "./notifications.js";
+import { logger } from "./lib/logger.js";
 
 export class WebhookHandlers {
   static async processWebhook(payload: Buffer, signature: string): Promise<void> {

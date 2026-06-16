@@ -27,10 +27,14 @@ export function CheckoutForm({ buttonText = "Get Started" }: { buttonText?: stri
         onSuccess: (data) => {
           window.location.href = data.url;
         },
-        onError: () => {
+        onError: (error) => {
+          const errMsg =
+            error instanceof Error
+              ? error.message
+              : "Could not start checkout. Please try again.";
           toast({
             title: "Checkout Error",
-            description: "Could not start checkout. Please try again.",
+            description: errMsg,
             variant: "destructive",
           });
         },

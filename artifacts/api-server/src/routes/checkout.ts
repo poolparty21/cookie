@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { getUncachableStripeClient } from "../stripeClient";
+import { getUncachableStripeClient } from "../stripeClient.js";
 import { CreateCheckoutBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -16,7 +16,16 @@ router.post("/checkout", async (req, res) => {
 
     const stripe = await getUncachableStripeClient();
 
-    const baseUrl = `https://${process.env.REPLIT_DOMAINS?.split(",")[0]}`;
+    const replitDomain = process.env.REPLIT_DOMAINS?.split(",")[0];
+    const host = req.get("host");
+    // Vercel terminates TLS at the edge, so req.protocol is "http" internally.
+    // Use x-forwarded-proto when available, fall back to https.
+    const protocol = req.get("x-forwarded-proto") || "https";
+    const baseUrl = replitDomain
+      ? `https://${replitDomain}`
+      : host
+        ? `${protocol}://${host}`
+        : `https://cookielite.online`;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

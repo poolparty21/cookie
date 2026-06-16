@@ -1,7 +1,27 @@
 import Stripe from 'stripe';
-import { StripeSync } from 'stripe-replit-sync';
 
+/**
+ * Resolves Stripe secret key and webhook secret from environment variables.
+ *
+ * Priority:
+ * 1. `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` — standard env vars (works anywhere: Vercel, Railway, etc.)
+ * 2. Replit connector API (fallback for Replit deployments)
+ */
 async function getCredentials(): Promise<{ secretKey: string; webhookSecret?: string }> {
+  // -----------------------------------------------------------------------
+  // Priority 1: Standard env vars (Vercel, Railway, Fly.io, etc.)
+  // -----------------------------------------------------------------------
+  const envKey = process.env.STRIPE_SECRET_KEY;
+  if (envKey) {
+    return {
+      secretKey: envKey,
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+    };
+  }
+
+  // -----------------------------------------------------------------------
+  // Priority 2: Replit connector (legacy)
+  // -----------------------------------------------------------------------
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? 'repl ' + process.env.REPL_IDENTITY
@@ -11,8 +31,8 @@ async function getCredentials(): Promise<{ secretKey: string; webhookSecret?: st
 
   if (!hostname || !xReplitToken) {
     throw new Error(
-      'Missing Replit environment variables. ' +
-      'Ensure the Stripe integration is connected via the Integrations tab.'
+      'Stripe is not configured. Set STRIPE_SECRET_KEY in your environment, ' +
+      'or connect Stripe via the Replit Integrations tab.'
     );
   }
 
@@ -59,7 +79,14 @@ export async function getUncachableStripeClient(): Promise<Stripe> {
   return new Stripe(secretKey);
 }
 
-export async function getStripeSync(): Promise<StripeSync> {
+/**
+ * Used only for Replit deployments where stripe-replit-sync manages
+ * webhook registration and DB syncing. On Vercel, webhooks are configured
+ * manually in the Stripe dashboard.
+ */
+export async function getStripeSync(): Promise<import('stripe-replit-sync').StripeSync> {
+  const { StripeSync } = await import('stripe-replit-sync');
+
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error('DATABASE_URL environment variable is required');

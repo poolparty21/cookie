@@ -1,5 +1,5 @@
-import { logger } from "./lib/logger";
-import { getUncachableResendClient } from "./resendClient";
+import { logger } from "./lib/logger.js";
+import { getUncachableResendClient } from "./resendClient.js";
 
 interface SaleNotification {
   eventType: string;

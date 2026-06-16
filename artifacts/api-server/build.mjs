@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build as esbuild } from "esbuild";
 import esbuildPluginPino from "esbuild-plugin-pino";
-import { rm } from "node:fs/promises";
+import { rm, writeFile, readFile } from "node:fs/promises";
 
 // Plugins (e.g. 'esbuild-plugin-pino') may use `require` to resolve dependencies
 globalThis.require = createRequire(import.meta.url);
@@ -14,6 +14,7 @@ async function buildAll() {
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
 
+  // Build main server entry (with app.listen)
   await esbuild({
     entryPoints: [path.resolve(artifactDir, "src/index.ts")],
     platform: "node",
@@ -49,7 +50,6 @@ async function buildAll() {
       "pg-native",
       "oracledb",
       "mongodb-client-encryption",
-      "nodemailer",
       "handlebars",
       "knex",
       "typeorm",
@@ -118,6 +118,116 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     `,
     },
   });
+
+  // Build Vercel serverless entry (exports Express app, no app.listen)
+  // Outputs to api/index.mjs so Vercel serves it at /api
+  await esbuild({
+    entryPoints: [path.resolve(artifactDir, "src/vercel-entry.ts")],
+    platform: "node",
+    bundle: true,
+    format: "esm",
+    outdir: path.resolve(artifactDir, "..", "..", "api"),
+    outExtension: { ".js": ".mjs" },
+    logLevel: "info",
+    external: [
+      "*.node",
+      "sharp",
+      "better-sqlite3",
+      "sqlite3",
+      "canvas",
+      "bcrypt",
+      "argon2",
+      "fsevents",
+      "re2",
+      "farmhash",
+      "xxhash-addon",
+      "bufferutil",
+      "utf-8-validate",
+      "ssh2",
+      "cpu-features",
+      "dtrace-provider",
+      "isolated-vm",
+      "lightningcss",
+      "pg-native",
+      "oracledb",
+      "mongodb-client-encryption",
+      "handlebars",
+      "knex",
+      "typeorm",
+      "protobufjs",
+      "onnxruntime-node",
+      "@tensorflow/*",
+      "@prisma/client",
+      "@mikro-orm/*",
+      "@grpc/*",
+      "@swc/*",
+      "@aws-sdk/*",
+      "@azure/*",
+      "@opentelemetry/*",
+      "@google-cloud/*",
+      "@google/*",
+      "googleapis",
+      "firebase-admin",
+      "@parcel/watcher",
+      "@sentry/profiling-node",
+      "@tree-sitter/*",
+      "aws-sdk",
+      "classic-level",
+      "dd-trace",
+      "ffi-napi",
+      "grpc",
+      "hiredis",
+      "kerberos",
+      "leveldown",
+      "miniflare",
+      "mysql2",
+      "newrelic",
+      "odbc",
+      "piscina",
+      "realm",
+      "ref-napi",
+      "rocksdb",
+      "sass-embedded",
+      "sequelize",
+      "serialport",
+      "snappy",
+      "tinypool",
+      "usb",
+      "workerd",
+      "wrangler",
+      "zeromq",
+      "zeromq-prebuilt",
+      "playwright",
+      "puppeteer",
+      "puppeteer-core",
+      "electron",
+    ],
+    sourcemap: "linked",
+    plugins: [
+      esbuildPluginPino({ transports: ["pino-pretty"] })
+    ],
+    banner: {
+      js: `import { createRequire as __bannerCrReq } from 'node:module';
+import __bannerPath from 'node:path';
+import __bannerUrl from 'node:url';
+
+globalThis.require = __bannerCrReq(import.meta.url);
+globalThis.__filename = __bannerUrl.fileURLToPath(import.meta.url);
+globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
+    `,
+    },
+  });
+
+  // Write api/index.mjs that re-exports the bundled entry so Vercel serves it at /api
+  const apiDir = path.resolve(artifactDir, "..", "..", "api");
+  await writeFile(
+    path.resolve(apiDir, "index.mjs"),
+    `/**
+ * Vercel serverless function entry point.
+ * Re-exports the bundled Express app from vercel-entry.mjs.
+ */
+export { default } from "./vercel-entry.mjs";\n`
+  );
 }
 
 buildAll().catch((err) => {

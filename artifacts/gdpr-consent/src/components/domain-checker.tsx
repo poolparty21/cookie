@@ -1,9 +1,10 @@
 import { useCheckDomain } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CheckCircle2, XCircle, Loader2, ShieldAlert, AlertTriangle, Gavel } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, ShieldAlert, AlertTriangle, Gavel, WifiOff } from "lucide-react";
 import { CheckoutForm } from "./checkout-form";
-import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
 
 const FINES = [
   { country: "Ireland", case: "Meta (Facebook)", fine: "€1.2 billion", year: "2023" },
@@ -23,6 +24,20 @@ export function DomainChecker() {
 
   const result = checkDomain.data;
   const isPending = checkDomain.isPending;
+  const error = checkDomain.error;
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Check Failed",
+        description: error instanceof Error
+          ? error.message
+          : "Could not reach the scanner. The API server may be unavailable. Please try again later.",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-4">
@@ -49,6 +64,22 @@ export function DomainChecker() {
           )}
         </Button>
       </form>
+
+      {error && (
+        <div className="dotted-frame p-6 animate-in fade-in slide-in-from-bottom-4 duration-500 border-destructive/40 bg-red-50/50">
+          <div className="flex items-start gap-4">
+            <WifiOff className="w-8 h-8 text-destructive flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-destructive text-lg mb-1">Scan unavailable.</p>
+              <p className="text-sm text-muted-foreground font-mono">
+                {error instanceof Error
+                  ? error.message
+                  : "The compliance scanner could not be reached. The domain will be checked automatically when the service is back online."}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {result && (
         <>
