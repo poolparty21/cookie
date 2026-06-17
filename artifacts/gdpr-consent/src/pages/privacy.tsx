@@ -8,6 +8,7 @@ export default function Privacy() {
         title="Privacy Policy | CookieLite"
         description="How we handle your data. Spoiler: with respect."
         canonicalUrl="/privacy"
+        image="/opengraph.jpg"
       />
 
       <article className="max-w-3xl mx-auto py-16 px-6 prose prose-slate max-w-none">

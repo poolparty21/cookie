@@ -11,6 +11,7 @@ export default function Home() {
         title="CookieLite — Cheapest GDPR Cookie Consent Banner"
         description="Get a fully compliant GDPR cookie banner for just €7/month. The most affordable GDPR cookie consent tool for small businesses. Easy setup."
         canonicalUrl="/"
+        image="/opengraph.jpg"
       />
 
       {/* Hero Section */}
